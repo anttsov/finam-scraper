@@ -2,7 +2,7 @@
 Mass quotes export from finam web site
 
 ## Requirements
-python v2.7, Scrapy 1.7
+python v3, Scrapy 1.7
 
 ## How to use
 We scrap minute data for all instruments in filteredInstruments.json 

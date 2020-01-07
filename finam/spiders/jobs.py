@@ -8,6 +8,8 @@ import urllib
 import logging
 import sys
 import io
+import traceback
+
 
 # create logger with 'spam_application'
 logger = logging.getLogger('spider')
@@ -109,7 +111,7 @@ class JobsSpider(Spider):
                 'Cookie': 'subscribeModal=cancelled; ASPSESSIONIDCCSCASDA=EHHEGMPBIMAIAPBBDFBMAOAB; ASPSESSIONIDCATDATDA=LLGAEIMCCJNLCNOKPKPFMBJM',
                 'Host': 'export.finam.ru'}
 
-            yield Request("http://export.finam.ru/" + instrument['code'] + start_date.isoformat() + ".csv?" + urllib.urlencode(params),
+            yield Request("http://export.finam.ru/" + instrument['code'] + start_date.isoformat() + ".csv?" + urllib.parse.urlencode(params),
                           headers=headers,
                           meta={'market': instrument['market'],
                                 'code': instrument['code'],
@@ -120,7 +122,7 @@ class JobsSpider(Spider):
 
     def parse(self, response):
         self.counter = self.counter + 1
-        logger.debug(`self.counter` + ' ' + response.meta['code'])
+        logger.debug('self.counter' + ' ' + response.meta['code'])
 
         if response.status == 403:
             logger.error('403: ' + response.url + ' : ' +
@@ -133,7 +135,7 @@ class JobsSpider(Spider):
             return
 
         try:
-            reader = csv.reader(response.body.split('\r\n'), delimiter=',')
+            reader = csv.reader(response.body.decode('utf-8').split('\r\n'), delimiter=',')
             for row in reader:
                 if len(row) == 9 and row[0] != '<TICKER>':
                     yield{'market': response.meta['market'],
@@ -152,6 +154,6 @@ class JobsSpider(Spider):
                           }
 
         except:
-            logger.error('Parse error: ' + sys.exc_info()[0])
+            logger.error('Parse error: ' + traceback.format_exc())
         finally:
             pass
